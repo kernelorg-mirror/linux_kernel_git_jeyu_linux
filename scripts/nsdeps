@@ -52,7 +52,7 @@ generate_deps() {
 	done
 }
 
-for f in `cat $objtree/modules.order`; do
+for f in `cat $MODORDER`; do
 	generate_deps $f
 done
 
