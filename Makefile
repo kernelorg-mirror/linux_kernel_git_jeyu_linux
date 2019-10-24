@@ -1685,6 +1685,8 @@ tags TAGS cscope gtags: FORCE
 PHONY += nsdeps
 
 nsdeps: modules
+	@find $(if $(KBUILD_EXTMOD), $(KBUILD_EXTMOD), .) $(RCS_FIND_IGNORE) \
+		-name '*.ns_deps' -type f -print | xargs rm -f
 	$(Q)$(MAKE) -f $(srctree)/scripts/Makefile.modpost nsdeps
 	$(Q)$(CONFIG_SHELL) $(srctree)/scripts/$@
 
