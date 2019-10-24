@@ -36,7 +36,7 @@ generate_deps() {
 					      | sed -E "s%(^|\s)([^/][^ ]*)%\1$srctree/\2%g"`
 	for ns in `cat $ns_deps_file`; do
 		echo "Adding namespace $ns to module $mod_name (if needed)."
-		generate_deps_for_ns $ns $mod_source_files
+		generate_deps_for_ns $ns "$mod_source_files"
 		# sort the imports
 		for source_file in $mod_source_files; do
 			sed '/MODULE_IMPORT_NS/Q' $source_file > ${source_file}.tmp
