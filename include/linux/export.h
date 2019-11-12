@@ -81,16 +81,30 @@ struct kernel_symbol {
 
 #else
 
+/*
+ * note on .section use: we specify progbits since usage of the "M" (SHF_MERGE)
+ * section flag requires it. Use '%progbits' instead of '@progbits' since the
+ * former apparently works on all arches according to the binutils source.
+ *
+ * Note this basically corresponds to:
+ * char __kstrtab_##sym[] __attribute__((section("__ksymtab_strings")) = #sym;
+ * char __kstrtabns_##sym[] __attribute__((section("__ksymtab_strings")) = ns;
+ */
+#define __KSTRTAB_ENTRY(sym, ns)						\
+	asm("	.section \"__ksymtab_strings\",\"aMS\",%progbits,1	\n"	\
+	    "__kstrtab_" #sym ":					\n"	\
+	    "	.asciz 	\"" #sym "\"					\n"	\
+	    "__kstrtabns_" #sym ":					\n"	\
+	    "	.asciz 	\"" ns "\"					\n"	\
+	    "	.previous						\n")
+
 /* For every exported symbol, place a struct in the __ksymtab section */
 #define ___EXPORT_SYMBOL(sym, sec, ns)					\
 	extern typeof(sym) sym;						\
+	extern const char __kstrtab_##sym[];				\
+	extern const char __kstrtabns_##sym[];				\
 	__CRC_SYMBOL(sym, sec);						\
-	static const char __kstrtab_##sym[]				\
-	__attribute__((section("__ksymtab_strings"), used, aligned(1)))	\
-	= #sym;								\
-	static const char __kstrtabns_##sym[]				\
-	__attribute__((section("__ksymtab_strings"), used, aligned(1)))	\
-	= ns;								\
+	__KSTRTAB_ENTRY(sym, ns);					\
 	__KSYMTAB_ENTRY(sym, sec)
 
 #endif
