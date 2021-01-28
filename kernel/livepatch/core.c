@@ -164,12 +164,8 @@ static int klp_find_object_symbol(const char *objname, const char *name,
 		.pos = sympos,
 	};
 
-	mutex_lock(&module_mutex);
-	if (objname)
+	if (objname || !kallsyms_on_each_symbol(klp_find_callback, &args))
 		module_kallsyms_on_each_symbol(klp_find_callback, &args);
-	else
-		kallsyms_on_each_symbol(klp_find_callback, &args);
-	mutex_unlock(&module_mutex);
 
 	/*
 	 * Ensure an address was found. If sympos is 0, ensure symbol is unique;
